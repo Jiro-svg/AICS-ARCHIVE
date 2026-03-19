@@ -1,0 +1,75 @@
+<?php
+$conn = new mysqli("sql208.infinityfree.com", "if0_41285833t", "", "if0_41285833_AICSarchive");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}		
+
+
+$sql = "SELECT * FROM events ORDER BY event_date DESC";
+$result = $conn->query($sql);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upcoming Events</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; color: #333; }
+        .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        
+        .event-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .event-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .event-info { padding: 30px; }
+        .event-date { color: #888; font-size: 0.9em; margin-bottom: 5px; }
+        .event-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
+        .event-desc { color: #555; font-size: 0.95em; }
+        .no-events { text-align: center; width: 100%; grid-column: 1 / -1; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📅 Upcoming Events</h1>
+        
+        <div class="event-grid">
+            <?php if ($result->num_rows > 0): ?>
+                <?php while($row = $result->fetch_assoc()): ?>
+                    <div class="event-card">
+                        <!-- Kung may image, ipakita, kung wala, default image -->
+                        <?php if(!empty($rowupload['image'])): ?>
+                            <img src="/<?php echo htmlspecialchars($row['image']); ?>" alt="Event Image">
+                        <?php else: ?>
+                            <img src="https://via.placeholder.com/400x200?text=No+Image" alt="No Image">
+                        <?php endif; ?>
+                        
+                        <div class="event-info">
+                            <div class="event-date">📆 <?php echo date("F d, Y", strtotime($row['event_date'])); ?></div>
+                            <div class="event-title"><?php echo htmlspecialchars($row['title']); ?></div>
+                            <div class="event-desc"><?php echo htmlspecialchars($row['description']); ?></div>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <div class="no-events">
+                    <h3>No events found.</h3>
+                    <p>Check back later for updates.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+</body>
+</html>

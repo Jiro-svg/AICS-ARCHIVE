@@ -1,0 +1,47 @@
+<?php
+include __DIR__ . "/dp.php";
+
+if (isset($_POST['upload'])) {
+
+    if (!isset($_FILES['file']) || $_FILES['file']['error'] !== 0) {
+        die("File upload error!");
+    }
+
+    $category = $_POST['category'];
+    $file = $_FILES['file'];
+
+    // Unique name
+    $fileName = uniqid() . "_" . basename($file['name']);
+    $tmpName  = $file['tmp_name'];
+
+    $uploadDir = __DIR__ . "/uploads/";
+
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+
+    $uploadPath = $uploadDir . $fileName;
+
+    $allowed = ['jpg', 'png', 'pdf', 'docx'];
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+    if (!in_array($ext, $allowed)) {
+        die("File type not allowed!");
+    }
+
+    if (move_uploaded_file($tmpName, $uploadPath)) {
+
+        $filePath = "php/uploads/" . $fileName;
+
+        $stmt = $conn->prepare("INSERT INTO upload (filename, filepath, category) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $fileName, $filePath, $category);
+        $stmt->execute();
+
+        // ⭐ AJAX friendly response
+        echo "success";
+
+    } else {
+        die("Upload failed!");
+    }
+}
+?>
